@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<div id="message"></div>
+<div id="chart" style="width: 800px;height:600px;"></div>
+
+<script src="bigdatamanagement/js/jquery-3.3.1.js"></script>
+<script src="bigdatamanagement/js/echarts.min.js"></script>
+
+<script>
+
+    var myChart = echarts.init(document.getElementById('chart'));
+
+    option = {
+        title: {
+            text: '动态数据',
+            subtext: '纯属虚构'
+        },
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+                type: 'cross',
+                label: {
+                    backgroundColor: '#283b56'
+                }
+            }
+        },
+        legend: {
+            //data:['最新成交价', '预购队列']
+            data:['最新成交价']
+        },
+        toolbox: {
+            show: true,
+            feature: {
+                dataView: {readOnly: false},
+                restore: {},
+                saveAsImage: {}
+            }
+        },
+        dataZoom: {
+            show: false,
+            start: 0,
+            end: 100
+        },
+        xAxis: [
+            {
+                type: 'category',
+                boundaryGap: true,
+                data: (function (){
+                    var now = new Date();
+                    var res = [];
+                    var len = 10;
+                    while (len--) {
+                        res.unshift(now.toLocaleTimeString().replace(/^\D*/,''));
+                        now = new Date(now - 2000);
+                    }
+                    return res;
+                })()
+            },
+            {
+                type: 'category',
+                boundaryGap: true,
+                data: (function (){
+                    var res = [];
+                    var len = 10;
+                    while (len--) {
+                        res.push(10 - len - 1);
+                    }
+                    return res;
+                })()
+            }
+        ],
+        yAxis: [
+            {
+                type: 'value',
+                scale: true,
+                name: '价格',
+                max: 30,
+                min: 0,
+                boundaryGap: [0.2, 0.2]
+            },
+            {
+                type: 'value',
+                scale: true,
+                name: '预购量',
+                max: 1200,
+                min: 0,
+                boundaryGap: [0.2, 0.2]
+            }
+        ],
+        series: [
+            /*{
+                name:'预购队列',
+                type:'bar',
+                xAxisIndex: 1,
+                yAxisIndex: 1,
+                data:(function (){
+                    var res = [];
+                    var len = 10;
+                    while (len--) {
+                        res.push(Math.round(Math.random() * 1000));
+                    }
+                    return res;
+                })()
+            },*/
+            {
+                name:'最新成交价',
+                type:'line',
+                symbolSize: 6,
+                /*symbolList : [
+                    'circle', 'rectangle', 'triangle', 'diamond',
+                    'emptyCircle', 'emptyRectangle', 'emptyTriangle', 'emptyDiamond'
+                ],*/
+                itemStyle: {
+                    normal: {
+                        color: function(params) {
+                            // build a color map as your need.
+                            var colorList = [
+                                "red","black"
+                            ];
+                            return colorList[params.dataIndex]
+                        },
+                        lineStyle: {
+                            color: "green"
+                        }
+                    }
+                },
+                data:(function (){
+                    var res = [];
+                    var len = 0;
+                    while (len < 10) {
+                        res.push((Math.random()*10 + 5).toFixed(1) - 0);
+                        len++;
+                    }
+                    return res;
+                })()
+            },
+            {
+                name:'最新成交价1',
+                type:'line',
+                data:(function (){
+                    var res = [];
+                    var len = 0;
+                    while (len < 10) {
+                        res.push((Math.random()*10 + 5).toFixed(1) - 0);
+                        len++;
+                    }
+                    return res;
+                })()
+            }
+        ]
+    };
+
+    /*myChart.count = 11;
+    setInterval(function (){
+        axisData = (new Date()).toLocaleTimeString().replace(/^\D*!/,'');
+
+        /!*var data0 = option.series[0].data;
+        var data1 = option.series[1].data;
+        data0.shift();
+        data0.push(Math.round(Math.random() * 1000));
+        data1.shift();
+        data1.push((Math.random() * 10 + 5).toFixed(1) - 0);
+
+        option.xAxis[0].data.shift();
+        option.xAxis[0].data.push(axisData);
+        option.xAxis[1].data.shift();
+        option.xAxis[1].data.push(myChart.count++);
+
+        option.series[1].itemStyle.normal.color = function(params) {
+            // build a color map as your need.
+            var colorList = [
+                "black","red"
+            ];
+            return colorList[params.dataIndex]
+        };*!/
+
+        var data0 = option.series[0].data;
+        data0.shift();
+        data0.push((Math.random() * 10 + 5).toFixed(1) - 0);
+
+        var data1 = option.series[1].data;
+        data1.shift();
+        data1.push((Math.random() * 10 + 5).toFixed(1) - 0);
+
+        option.xAxis[0].data.shift();
+        option.xAxis[0].data.push(axisData);
+        option.xAxis[1].data.shift();
+        option.xAxis[1].data.push(myChart.count++);
+
+        option.series[0].itemStyle.normal.color = function(params) {
+            // build a color map as your need.
+            var colorList = [
+                "black","red"
+            ];
+            return colorList[params.dataIndex]
+        };
+
+        myChart.setOption(option);
+    }, 2100);*/
+
+    myChart.setOption(option);
+
+    var websocket = null;
+    //判断当前浏览器是否支持WebSocket
+    if ('WebSocket' in window) {
+        websocket = new WebSocket("ws://localhost:9080/websocket");
+    }
+    else {
+        alert('当前浏览器 Not support websocket')
+    }
+
+    //连接发生错误的回调方法
+    websocket.onerror = function () {
+        setMessageInnerHTML("WebSocket连接发生错误");
+    };
+
+    //连接成功建立的回调方法
+    websocket.onopen = function () {
+        setMessageInnerHTML("WebSocket连接成功");
+    };
+
+    myChart.count = 11;
+    //接收到消息的回调方法
+    websocket.onmessage = function (event) {
+
+        var jsonString = event.data;
+        var json = JSON.parse(jsonString);
+        var ts = json.data[0].ts;
+        var value = json.data[0].value;
+
+        var data0 = option.series[0].data;
+        data0.shift();
+        data0.push(value);
+
+        var data1 = option.series[1].data;
+        data1.shift();
+        data1.push((Math.random() * 10 + 5).toFixed(1) - 0);
+
+        option.xAxis[0].data.shift();
+        option.xAxis[0].data.push(fmtDate(ts));
+        option.xAxis[1].data.shift();
+        option.xAxis[1].data.push(myChart.count++);
+
+        option.series[0].itemStyle.normal.color = function(params) {
+            // build a color map as your need.
+            var colorList = [
+                "black","red"
+            ];
+            return colorList[params.dataIndex]
+        };
+        myChart.setOption(option);
+    };
+
+    //连接关闭的回调方法
+    websocket.onclose = function () {
+        setMessageInnerHTML("WebSocket连接关闭");
+    };
+
+    //监听窗口关闭事件，当窗口关闭时，主动去关闭websocket连接，防止连接还没断开就关闭窗口，server端会抛异常。
+    window.onbeforeunload = function () {
+        closeWebSocket();
+    };
+
+    //将消息显示在网页上
+    function setMessageInnerHTML(innerHTML) {
+        document.getElementById('message').innerHTML += innerHTML + '<br/>';
+    }
+
+    //关闭WebSocket连接
+    function closeWebSocket() {
+        websocket.close();
+    }
+
+    function fmtDate(obj){
+        var date =  new Date(obj);
+        //var y = 1900+date.getYear();
+        var m = "0"+(date.getMonth()+1);
+        var d = "0"+date.getDate();
+        var h = "0"+date.getHours();
+        var min = "0"+date.getMinutes();
+        var s = "0"+date.getSeconds();
+        return h.substring(h.length-2,h.length)+":"+min.substring(min.length-2,min.length)+":"+s.substring(s.length-2,s.length);
+    }
+
+</script>
+
+</body>
+</html>

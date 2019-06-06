@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.bupt.dao.DetectionImpl">
+
+    <insert id="addDetectionParameters">
+        insert into detection (id,mu,sigma,SPEmu,SPEsigma,eigenvectorMatrix,X,cluster_id) values (#{id},#{mu},#{sigma},#{SPEmu},#{SPEsigma},#{eigenvectorMatrix},#{X},#{cluster_id})
+    </insert>
+
+    <select id="getDetectionParameters" resultType="org.bupt.bean.Detection">
+        select * from detection where cluster_id = (#{cluster_id})
+    </select>
+
+    <update id="updateDetectionParameters">
+        update detection set mu=#{mu},sigma=#{sigma},SPEmu=#{SPEmu},SPEsigma=#{SPEsigma},eigenvectorMatrix=#{eigenvectorMatrix},X=#{X} where cluster_id=#{cluster_id}
+    </update>
+
+    <delete id="deleteDetection">
+        delete from detection where cluster_id=#{cluster_id}
+    </delete>
+
+    <insert id="addDetectionStatus">
+        insert into detection_status (id,device_id,cluster_id,running_status,time_interval,init_number,current_init,init_or_update,data_array,last_tendata,last_update_time,time_array,data_update,init_pattern,cluster_name) values (#{id},#{device_id},#{cluster_id},#{running_status},#{time_interval},#{init_number},#{current_init},#{init_or_update},#{data_array},#{last_tendata},#{last_update_time},#{time_array},#{data_update},#{init_pattern},#{cluster_name})
+    </insert>
+
+    <select id="getDetectionStatus" resultType="org.bupt.bean.DetectionStatus">
+        select * from detection_status where cluster_id = (#{cluster_id})
+    </select>
+
+    <select id="getAllDetectionStatus" resultType="org.bupt.bean.DetectionStatus">
+        select * from detection_status
+    </select>
+
+    <select id="getDetectionStatusByDeviceId" resultType="org.bupt.bean.DetectionStatus">
+        select * from detection_status where device_id=#{device_id}
+    </select>
+
+    <update id="updateDetectionStatus">
+        update detection_status set device_id=#{device_id},cluster_id=#{cluster_id},running_status=#{running_status},time_interval=#{time_interval},init_number=#{init_number},current_init=#{current_init},init_or_update=#{init_or_update},data_array=#{data_array},data_update=#{data_update},last_tendata=#{last_tendata},last_update_time=#{last_update_time},time_array=#{time_array},init_pattern=#{init_pattern} where id=#{id}
+    </update>
+
+    <update id="updateDetectionStatusWeb">
+        update detection_status set time_interval=#{time_interval},current_init=#{current_init},cluster_name=#{cluster_name} where cluster_id=#{cluster_id}
+    </update>
+
+    <update id="startorStopDetection">
+        update detection_status set running_status=#{running_status} where cluster_id=#{cluster_id}
+    </update>
+
+    <update id="updateDetectionStatusInitTest">
+        update detection_status set current_init=#{current_init},init_or_update=#{init_or_update},data_array=#{data_array},data_update=#{data_update},last_tendata=#{last_tendata},last_update_time=#{last_update_time} where id=#{id}
+    </update>
+
+    <delete id="deleteDetectionStatus">
+        delete from detection_status where cluster_id=#{cluster_id}
+    </delete>
+
+    <select id="getDistinctDeviceId" resultType="string">
+        select distinct device_id  from detection_status
+    </select>
+
+    <select id="getDistinctClusterId" resultType="string">
+        select distinct cluster_id  from detection_status
+    </select>
+
+    <insert id="addDetectionData">
+        insert into detection_data (id,Station_Id_C,update_time,PRS,PRS_Sea,TEM,RHU,VAP,PRE_1h,WIN_S_Avg_2mi,WIN_D_S_Max,CLO_COV_LM) values (#{id},#{Station_Id_C},#{update_time},#{PRS},#{PRS_Sea},#{TEM},#{RHU},#{VAP},#{PRE_1h},#{WIN_S_Avg_2mi},#{WIN_D_S_Max},#{CLO_COV_LM})
+    </insert>
+
+    <select id="getAllDetectionData" resultType="org.bupt.bean.Data">
+        select * from detection_data where update_time between 1545840000000 and 1546196401000
+    </select>
+
+    <select id="getOneDetectionData" resultType="org.bupt.bean.Data">
+        select * from detection_data where update_time between #{startTime} and #{endTime}
+    </select>
+
+    <insert id="addDetectionResource">
+        insert into detection_resource (id,Station_Id_C,update_time,PRS,PRS_Sea,PRS_Max,PRS_Min,TEM,TEM_Max,TEM_Min,RHU,RHU_Min,VAP,PRE_1h,WIN_D_INST_Max,WIN_S_Max,WIN_D_S_Max,WIN_S_Avg_2mi,WIN_D_Avg_2mi,WEP_Now,WIN_S_Inst_Max,tigan,windpower,VIS,CLO_Cov,CLO_Cov_Low,CLO_COV_LM) values (#{id},#{Station_Id_C},#{update_time},#{PRS},#{PRS_Sea},#{PRS_Max},#{PRS_Min},#{TEM},#{TEM_Max},#{TEM_Min},#{RHU},#{RHU_Min},#{VAP},#{PRE_1h},#{WIN_D_INST_Max},#{WIN_S_Max},#{WIN_D_S_Max},#{WIN_S_Avg_2mi},#{WIN_D_Avg_2mi},#{WEP_Now},#{WIN_S_Inst_Max},#{tigan},#{windpower},#{VIS},#{CLO_Cov},#{CLO_Cov_Low},#{CLO_COV_LM})
+    </insert>
+
+    <select id="getAllDetectionResource" resultType="org.bupt.bean.Resource">
+        select * from detection_resource where update_time between 1545926400000 and 1546282800000 order by Station_Id_C asc,update_time asc
+    </select>
+
+    <select id="getOneDetectionResource" resultType="org.bupt.bean.Resource">
+        select * from detection_resource where update_time between #{startTime} and #{endTime} and (Station_Id_C between 54398 and 54406) order by Station_Id_C asc,update_time asc
+    </select>
+
+    <select id="getOneDetectionResourceTest" resultType="org.bupt.bean.Resource">
+        select * from detection_resource where update_time between #{startTime} and #{endTime} and (Station_Id_C between #{startStation} and #{endStation}) order by Station_Id_C asc,update_time asc
+    </select>
+
+</mapper>
